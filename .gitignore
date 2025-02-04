@@ -1,14 +1,12 @@
 __pycache__
 *.png
 *.jpg
-*.gif
-*.mp4
+*.jpeg
 *.zip
 *.ckpt
 *.pth
 *.bin
 *.torchscript
-*.webp
 *.engine
 weights.txt
 manifest.txt

@@ -1,5 +1,9 @@
 # GENAPI-image-sdxl
-ML Microserver for image generation with sdxl and comfyui
+ML Microserver for panoramic image generation with sdxl and comfyui
+
+![](animation_frames/test_1.webp)
+
+![](animation_frames/animation.gif)
 
 ## Setup
 
