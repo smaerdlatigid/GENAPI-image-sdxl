@@ -3,6 +3,7 @@ build:
   cuda: "12.1"
   system_packages:
     - ffmpeg
+    - nano
   python_version: "3.10.6"
   python_packages:
     - torch
@@ -32,6 +33,8 @@ build:
     - wget
     - minio
     - imageio
+    - requests
+    - tqdm
 
     # fix for pydantic issues in cog
     # https://github.com/replicate/cog/issues/1623
@@ -50,24 +53,6 @@ build:
     # ComfyUI_essentials
     - numba
 
-    # ComfyUI_FizzNodes
-    - pandas
-    - numexpr
-
-    # comfyui-reactor-node
-    - insightface
-    - onnx
-
-    # ComfyUI-Impact-Pack
-    - segment-anything
-    - piexif
-
-    # ComfyUI-Impact-Subpack
-    - ultralytics!=8.0.177
-
-    # comfyui_segment_anything
-    - timm
-
     # comfyui_controlnet_aux
     # https://github.com/Fannovel16/comfyui_controlnet_aux/blob/main/requirements.txt
     - importlib_metadata
@@ -85,13 +70,13 @@ build:
     - addict
     - yacs
     - trimesh[easy]
-
+    - ultralytics!=8.0.177
+    - segment-anything
+    - timm
+  
     # ComfyUI-KJNodes
     - librosa
     - color-matcher
-
-    # PuLID
-    - facexlib
 
     # SUPIR
     - open-clip-torch>=2.24.0

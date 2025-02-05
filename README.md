@@ -15,7 +15,13 @@ Clone the repo with all submodules:
 git clone --recurse-submodules git@github.com:smaerdlatigid/GENAPI-image-sdxl.git
 ```
 
-Once you see the `ComfyUI` directory in the repo, you can install the custom nodes:
+Build the docker image and go into the container so you can install the custom nodes:
+
+```bash
+cog run -p 8888 bash
+```
+
+Once in the container, run the following to install all the custom nodes:
 
 ```sh
 ./scripts/install_custom_nodes.py
@@ -23,12 +29,9 @@ Once you see the `ComfyUI` directory in the repo, you can install the custom nod
 
 ## Local Development
 
-Build the Docker image and run ComfyUI to start the server:
+To run the server locally, you can use the following command:
+
 ```bash
-cog run -p 8888 bash
 cd ComfyUI
 python main.py --listen 0.0.0.0 --port 8888
 ```
-
-
-

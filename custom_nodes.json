@@ -1,0 +1,54 @@
+[
+  {
+    "repo": "https://github.com/kijai/ComfyUI-KJNodes",
+    "commit": "13242fc"
+  },
+  {
+    "repo": "https://github.com/jags111/ComfyUI_Jags_VectorMagic",
+    "commit": "8c6cd6b"
+  },
+  {
+    "repo": "https://github.com/gokayfem/ComfyUI-Dream-Interpreter",
+    "commit": "cb92b32"
+  },
+  {
+    "repo": "https://github.com/kijai/ComfyUI-DepthAnythingV2.git",
+    "commit": "e8dd1c4"
+  },
+  {
+    "repo": "https://github.com/WASasquatch/was-node-suite-comfyui.git",
+    "commit": "5e5dbc1"
+  },
+  {
+    "repo": "https://github.com/sipherxyz/comfyui-art-venture.git",
+    "commit": "50abaac"
+  },
+  {
+    "repo": "https://github.com/rgthree/rgthree-comfy.git",
+    "commit": "6f82a5c"
+  },
+  {
+    "repo": "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git",
+    "commit": "d78b780"
+  },
+  {
+    "repo": "https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git",
+    "commit": "ff3fdfe"
+  },
+  {
+    "repo": "https://github.com/chflame163/ComfyUI_LayerStyle.git",
+    "commit": "edceb07"
+  },
+  {
+    "repo": "https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet",
+    "commit": "172543b"
+  },
+  {
+    "repo": "https://github.com/Fannovel16/comfyui_controlnet_aux.git",
+    "commit": "5a049bd"
+  },
+  {
+    "repo": "https://github.com/cubiq/ComfyUI_essentials.git",
+    "commit": "33ff89f"
+  }
+]
