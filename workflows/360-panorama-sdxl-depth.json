@@ -1,0 +1,193 @@
+{
+  "4": {
+    "inputs": {
+      "ckpt_name": "dreamshaperXL_v21TurboDPMSDE.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "5": {
+    "inputs": {
+      "width": 2048,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "glowing mushrooms floating gracefully amidst a cosmic backdrop. These mystical fungi glow in blue and purple hues reminiscent of distant stars and cosmic rays, growing seamlessly around twinkling stars and planets in gentle patterns. Comets streak through space, while planets orbit gently like celestial dancers. Use soft focus for an otherworldly atmosphere, with distant galaxies and nebulae effects enhancing the mystical theme. Ensure just enough detail to make each mushroom stand out as magical creatures, equirectangular, 360 panorama, cinematic",
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "boring, text ,signature, watermark, low quality, bad quality, grainy, blurry, long neck, closed eyes",
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "Image",
+      "images": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "10": {
+    "inputs": {
+      "lora_name": "360RedmondResized.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "clip": [
+        "4",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "11": {
+    "inputs": {
+      "seed": 80484030936239,
+      "steps": 11,
+      "cfg": 3.5,
+      "sampler_name": "dpmpp_sde",
+      "scheduler": "ddim_uniform",
+      "denoise": 1,
+      "tileX": 1,
+      "tileY": 0,
+      "model": [
+        "10",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "xy_Tiling_KSampler",
+    "_meta": {
+      "title": "Jags-XY_tile sampler"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "CircularVAEDecode",
+    "_meta": {
+      "title": "Jags-CircularVAEDecode"
+    }
+  },
+  "22": {
+    "inputs": {
+      "vae_name": "sdxl.vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "23": {
+    "inputs": {
+      "da_model": [
+        "24",
+        0
+      ],
+      "images": [
+        "25",
+        0
+      ]
+    },
+    "class_type": "DepthAnything_V2",
+    "_meta": {
+      "title": "Depth Anything V2"
+    }
+  },
+  "24": {
+    "inputs": {
+      "model": "depth_anything_v2_vitl_fp16.safetensors"
+    },
+    "class_type": "DownloadAndLoadDepthAnythingV2Model",
+    "_meta": {
+      "title": "DownloadAndLoadDepthAnythingV2Model"
+    }
+  },
+  "25": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "upscale_method": "nearest-exact",
+      "keep_proportion": true,
+      "divisible_by": 2,
+      "crop": "disabled",
+      "image": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "26": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "23",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  }
+}

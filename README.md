@@ -41,3 +41,11 @@ In the container, start the ComfyUI server:
 cd ComfyUI
 python main.py --listen 0.0.0.0 --port 8888
 ```
+
+## Helpful Docker commands
+
+`docker ps` - List all running containers
+
+`docker logs`  - View the logs of a container
+
+`docker rmi $(docker images -q)` - Remove all images
