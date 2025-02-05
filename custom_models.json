@@ -1,0 +1,21 @@
+{
+    "checkpoints": [
+        "https://civitai.com/api/download/models/351306"
+    ],
+    "loras": [
+        "https://civitai.com/api/download/models/143197?type=Model&format=SafeTensor"
+    ],
+    "vae": [
+        "https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/main/sdxl.vae.safetensors?download=true"
+    ],
+    "upscale_models": [
+        "https://civitai.com/api/download/models/125843?type=Model&format=PickleTensor",
+        "https://huggingface.co/ai-forever/Real-ESRGAN/resolve/main/RealESRGAN_x2.pth"
+    ],
+    "depthanything": [
+        "https://huggingface.co/Kijai/DepthAnythingV2-safetensors/resolve/main/depth_anything_v2_vitl_fp32.safetensors"
+    ],
+    "controlnet": [
+        "https://huggingface.co/xinsir/controlnet-union-sdxl-1.0/resolve/main/diffusion_pytorch_model_promax.safetensors?download=true"
+    ]
+}

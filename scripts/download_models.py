@@ -63,7 +63,7 @@ def download_file(url, destination_path):
         print(f"Error downloading {url}: {str(e)}")
         return False
 
-def main():
+if __name__ == "__main__":
     # Base directory
     base_dir = "ComfyUI/models"
 
@@ -83,6 +83,3 @@ def main():
                 print(f"Successfully downloaded to {directory}")
             else:
                 print(f"Failed to download {url}")
-
-if __name__ == "__main__":
-    main()
