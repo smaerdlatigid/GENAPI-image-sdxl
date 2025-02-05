@@ -72,7 +72,7 @@ build:
     - trimesh[easy]
     - ultralytics!=8.0.177
     - segment-anything
-    - timm
+    - timm<=1.0.14
   
     # ComfyUI-KJNodes
     - librosa

@@ -1,3 +1,4 @@
+# TODO add variable for angle to start from
 import os
 import glob
 import argparse

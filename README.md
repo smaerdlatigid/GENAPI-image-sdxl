@@ -11,13 +11,13 @@ Ensure you have Linux/WSL2, [cog](https://github.com/replicate/cog/blob/main/doc
 
 Clone the repo with all submodules:
 
-```bash
+```sh
 git clone --recurse-submodules git@github.com:smaerdlatigid/GENAPI-image-sdxl.git
 ```
 
 Build the docker image and go into the container so you can install the custom nodes:
 
-```bash
+```sh
 cog run -p 8888 bash
 ```
 
@@ -27,9 +27,15 @@ Once in the container, run the following to install all the custom nodes:
 ./scripts/install_custom_nodes.py
 ```
 
+Then, download all of the models + checkpoints:
+
+```sh
+./scripts/download_models.py
+```
+
 ## Local Development
 
-To run the server locally, you can use the following command:
+In the container, start the ComfyUI server:
 
 ```bash
 cd ComfyUI
