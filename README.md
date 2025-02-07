@@ -21,7 +21,7 @@ Build the docker image and go into the container so you can install the custom n
 cog run -p 8888 bash
 ```
 
-Once in the container, run the following to install all the custom nodes:
+Once in the container, run the following:
 
 ```sh
 ./scripts/install_custom_nodes.py
@@ -42,10 +42,85 @@ cd ComfyUI
 python main.py --listen 0.0.0.0 --port 8888
 ```
 
+If you want to customize your comfyui, you can add:
+- new nodes in `custom_nodes.json`
+- new models in `custom_models.json`
+
+Then, run their respective scripts to install/download them and restart the server. If the nodes require new dependencies, you can add them to `cog.yaml`.
+
+## Deployment
+
+Prior to creating a deployment, ensure the predict function works as expected. You can test this by running the following:
+
+```sh
+cog predict -i prompt="magical glowing mushrooms in space with pyramids"
+```
+
+Build the docker image for deployment:
+
+```sh
+cog build -t 360-panorama-sdxl
+```
+
+Start the microservice:
+
+```sh
+docker run -d -p 7777:5000 --gpus 1 360-panorama-sdxl
+```
+Make sure all of the environment variables are set correctly. Inspect the API docs in your browser at [http://localhost:7777/docs](). 
+
+### Testing
+
+Make sure the microservice is running and then test using:
+
+```sh
+curl -X 'POST' \
+  'http://localhost:7777/predictions' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "input": {
+    "prompt": "Magical mushroom forest in space",
+    "suffix_prompt": "equirectangular, 360 panorama",
+    "negative_prompt": "boring, text, signature, watermark, low quality, bad quality, grainy, blurry",
+    "width": 2048,
+    "height": 1024,
+    "seed": -1,
+    "lora_strength": 1.0,
+    "cfg": 4.20,
+    "steps": 10,
+    "sampler": "dpmpp_sde_gpu",
+    "scheduler": "karras",
+    "tile_x": true,
+    "tile_y": false,
+    "output_format": "webp"
+  }
+}'
+```
+
+Inspect the container logs in docker to see if the request in action.
+
+
 ## Helpful Docker commands
 
 `docker ps` - List all running containers
 
-`docker logs`  - View the logs of a container
+`docker logs <container_id>` - View the logs of a container
 
 `docker rmi $(docker images -q)` - Remove all images
+
+`docker rm $(docker ps -a -q)` - Remove all exited containers
+
+## Extra
+
+Create a mosaic to assess the best performing parameters
+
+1. start the microservice
+2. go into the container: `docker exec -it 360-panorama-sdxl bash`
+3. run the script: `./scripts/mosaic.py`
+
+
+To Do:
+- copy predict function
+- add env vars
+- move into worker compose in api repo, profile
