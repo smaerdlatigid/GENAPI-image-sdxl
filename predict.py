@@ -44,7 +44,7 @@ class Predictor(BasePredictor):
         try:
             self.cloud.list_buckets()
         except Exception as e:
-            print(f"Failed to connect to Minio: {e}\ntry adjusting environment variables")
+            raise(f"Failed to connect to Minio: {e}\ntry adjusting environment variables")
 
     def predict(
         self,

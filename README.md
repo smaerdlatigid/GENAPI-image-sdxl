@@ -65,7 +65,7 @@ cog build -t 360-panorama-sdxl
 Start the microservice:
 
 ```sh
-docker run -d -p 7777:5000 --env-file ./.env --gpus 1 --name 360-panorama-sdxl -v ./images:/src/images 360-panorama-sdxl
+docker run -d -p 7777:5000 --env-file ./.env --gpus 1 --name 360-panorama-sdxl
 ```
 
 Make sure all of the environment variables are set correctly. Inspect the API docs in your browser at [http://localhost:7777/docs](). 
