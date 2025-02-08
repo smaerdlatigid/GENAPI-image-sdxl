@@ -23,8 +23,8 @@
 # .pt files are used by efficiency-nodes-comfyui
 
 # Files
-scripts/*
 test/*
+images/*
 updated_weights.json
 downloaded_user_models/
 

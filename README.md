@@ -65,8 +65,9 @@ cog build -t 360-panorama-sdxl
 Start the microservice:
 
 ```sh
-docker run -d -p 7777:5000 --gpus 1 360-panorama-sdxl
+docker run -d -p 7777:5000 --env-file ./.env --gpus 1 --name 360-panorama-sdxl -v ./images:/src/images 360-panorama-sdxl
 ```
+
 Make sure all of the environment variables are set correctly. Inspect the API docs in your browser at [http://localhost:7777/docs](). 
 
 ### Testing
@@ -100,7 +101,6 @@ curl -X 'POST' \
 
 Inspect the container logs in docker to see if the request in action.
 
-
 ## Helpful Docker commands
 
 `docker ps` - List all running containers
@@ -115,12 +115,9 @@ Inspect the container logs in docker to see if the request in action.
 
 Create a mosaic to assess the best performing parameters
 
-1. start the microservice
-2. go into the container: `docker exec -it 360-panorama-sdxl bash`
-3. run the script: `./scripts/mosaic.py`
+1. change bucket_image in .env to `test`
+2. start the microservice and mount the images dir: `-v ./images:/src/images`
+3. go into the container: `docker exec -it 360-panorama-sdxl bash`
+4. run the script: `./scripts/mosaic_settings.py`
 
-
-To Do:
-- copy predict function
-- add env vars
-- move into worker compose in api repo, profile
+![](images/mosaic_zoomed.png)

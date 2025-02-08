@@ -119,8 +119,8 @@ def main():
     parser = argparse.ArgumentParser(description='Generate animated rotation of an equirectangular image')
     parser.add_argument('input_path', type=str, 
                         help='Path to the input equirectangular image')
-    parser.add_argument('--output_dir', type=str, default='animation_frames',
-                        help='Directory to store frames (default: animation_frames)')
+    parser.add_argument('--output_dir', type=str, default='images',
+                        help='Directory to store frames (default: images)')
     parser.add_argument('--fps', type=int, default=10,
                         help='Frames per second for animation (default: 10)')
     parser.add_argument('--width', type=int, default=320,

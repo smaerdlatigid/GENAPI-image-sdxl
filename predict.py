@@ -1,8 +1,10 @@
 import os
 import json
 from typing import List
-from dotenv import load_dotenv
-load_dotenv()
+
+# uncomment to run cog predict
+#from dotenv import load_dotenv
+#load_dotenv()
 
 from PIL import Image
 from cog import BasePredictor, Input
@@ -26,29 +28,6 @@ BUCKETS = {
 }
 
 
-
-# def optimise_image_files(
-#     output_format: str = DEFAULT_FORMAT, output_quality: int = DEFAULT_QUALITY, files=[]
-# ):
-#     if should_optimise_images(output_format, output_quality):
-#         optimised_files = []
-#         for file in files:
-#             if file.is_file() and file.suffix in IMAGE_FILE_EXTENSIONS:
-#                 image = Image.open(file)
-#                 optimised_file_path = file.with_suffix(f".{output_format}")
-#                 image.save(
-#                     optimised_file_path,
-#                     quality=output_quality,
-#                     optimize=True,
-#                 )
-#                 optimised_files.append(optimised_file_path)
-#             else:
-#                 optimised_files.append(file)
-
-#         return optimised_files
-#     else:
-#         return files
-
 class Predictor(BasePredictor):
 
     def setup(self):
@@ -62,7 +41,10 @@ class Predictor(BasePredictor):
             external_endpoint=os.environ['MINIO_EXTERNAL_ENDPOINT']
         )
 
-        # TODO add a way to test the connection to the cloud storage by listing buckets
+        try:
+            self.cloud.list_buckets()
+        except Exception as e:
+            print(f"Failed to connect to Minio: {e}\ntry adjusting environment variables")
 
     def predict(
         self,
