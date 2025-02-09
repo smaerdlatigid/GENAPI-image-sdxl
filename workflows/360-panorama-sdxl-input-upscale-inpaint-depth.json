@@ -1,0 +1,884 @@
+{
+  "6": {
+    "inputs": {
+      "text": "glowing mushrooms floating gracefully amidst a cosmic backdrop. These mystical fungi glow in blue and purple hues reminiscent of distant stars and cosmic rays, growing seamlessly around twinkling stars and planets in gentle patterns. Comets streak through space, while planets orbit, equirectangular, 360 panorama, cinematic",
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "boring, text ,signature, watermark, low quality, bad quality, grainy, blurry, long neck, closed eyes",
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "10": {
+    "inputs": {
+      "lora_name": "360RedmondResized.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "model": [
+        "96",
+        0
+      ],
+      "clip": [
+        "96",
+        1
+      ]
+    },
+    "class_type": "LoraLoader",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "22": {
+    "inputs": {
+      "vae_name": "sdxl.vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "38": {
+    "inputs": {
+      "upscale_by": [
+        "146",
+        0
+      ],
+      "seed": 192448367605881,
+      "steps": 10,
+      "cfg": 1,
+      "sampler_name": "uni_pc",
+      "scheduler": "beta",
+      "denoise": 0.3,
+      "mode_type": "Linear",
+      "tile_width": 1024,
+      "tile_height": 1024,
+      "mask_blur": 16,
+      "tile_padding": 128,
+      "seam_fix_mode": "Half Tile",
+      "seam_fix_denoise": 1,
+      "seam_fix_width": 256,
+      "seam_fix_mask_blur": 8,
+      "seam_fix_padding": 64,
+      "force_uniform_tiles": true,
+      "tiled_decode": false,
+      "image": [
+        "130",
+        0
+      ],
+      "model": [
+        "10",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "vae": [
+        "22",
+        0
+      ],
+      "upscale_model": [
+        "39",
+        0
+      ]
+    },
+    "class_type": "UltimateSDUpscale",
+    "_meta": {
+      "title": "Ultimate SD Upscale"
+    }
+  },
+  "39": {
+    "inputs": {
+      "model_name": "4xUltrasharp_4xUltrasharpV10.pt"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "96": {
+    "inputs": {
+      "ckpt_name": "dreamshaperXL_v21TurboDPMSDE.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "97": {
+    "inputs": {
+      "seed": 945136699822492,
+      "steps": 6,
+      "cfg": 2,
+      "sampler_name": "euler",
+      "scheduler": "beta",
+      "denoise": 1,
+      "model": [
+        "96",
+        0
+      ],
+      "positive": [
+        "101",
+        0
+      ],
+      "negative": [
+        "101",
+        1
+      ],
+      "latent_image": [
+        "104",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "100": {
+    "inputs": {
+      "samples": [
+        "97",
+        0
+      ],
+      "vae": [
+        "96",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "101": {
+    "inputs": {
+      "strength": 1,
+      "start_percent": 0,
+      "end_percent": 1,
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "control_net": [
+        "102",
+        0
+      ],
+      "image": [
+        "102",
+        1
+      ]
+    },
+    "class_type": "ACN_AdvancedControlNetApply",
+    "_meta": {
+      "title": "Apply Advanced ControlNet 🛂🅐🅒🅝"
+    }
+  },
+  "102": {
+    "inputs": {
+      "name": "diffusion_pytorch_model_promax.safetensors",
+      "plus_input": [
+        "103",
+        0
+      ]
+    },
+    "class_type": "ACN_ControlNet++LoaderAdvanced",
+    "_meta": {
+      "title": "Load ControlNet++ Model (Multi) 🛂🅐🅒🅝"
+    }
+  },
+  "103": {
+    "inputs": {
+      "control_type": "inpaint/outpaint",
+      "image": [
+        "112",
+        0
+      ]
+    },
+    "class_type": "ACN_ControlNet++InputNode",
+    "_meta": {
+      "title": "ControlNet++ Input 🛂🅐🅒🅝"
+    }
+  },
+  "104": {
+    "inputs": {
+      "width": [
+        "106",
+        1
+      ],
+      "height": [
+        "106",
+        2
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "106": {
+    "inputs": {
+      "image": [
+        "113",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "108": {
+    "inputs": {
+      "shape": "square",
+      "frames": 1,
+      "location_x": 128,
+      "location_y": [
+        "149",
+        0
+      ],
+      "grow": 0,
+      "frame_width": 256,
+      "frame_height": [
+        "148",
+        2
+      ],
+      "shape_width": 32,
+      "shape_height": [
+        "148",
+        2
+      ]
+    },
+    "class_type": "CreateShapeMask",
+    "_meta": {
+      "title": "Create Shape Mask"
+    }
+  },
+  "109": {
+    "inputs": {
+      "image": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "110": {
+    "inputs": {
+      "mask": [
+        "108",
+        1
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "111": {
+    "inputs": {
+      "images": [
+        "110",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "112": {
+    "inputs": {
+      "blend_factor": 1,
+      "blend_mode": "multiply",
+      "image1": [
+        "110",
+        0
+      ],
+      "image2": [
+        "133",
+        0
+      ]
+    },
+    "class_type": "ImageBlend",
+    "_meta": {
+      "title": "ImageBlend"
+    }
+  },
+  "113": {
+    "inputs": {
+      "width": [
+        "156",
+        0
+      ],
+      "height": [
+        "109",
+        2
+      ],
+      "x": [
+        "153",
+        0
+      ],
+      "y": 0,
+      "image": [
+        "133",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "ImageCrop"
+    }
+  },
+  "115": {
+    "inputs": {
+      "width": [
+        "153",
+        0
+      ],
+      "height": [
+        "109",
+        2
+      ],
+      "x": 0,
+      "y": 0,
+      "image": [
+        "133",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "ImageCrop"
+    }
+  },
+  "117": {
+    "inputs": {
+      "stitch": "right",
+      "feathering": 0,
+      "image_a": [
+        "115",
+        0
+      ],
+      "image_b": [
+        "100",
+        0
+      ]
+    },
+    "class_type": "Image Stitch",
+    "_meta": {
+      "title": "Image Stitch"
+    }
+  },
+  "118": {
+    "inputs": {
+      "width": [
+        "153",
+        0
+      ],
+      "height": [
+        "109",
+        2
+      ],
+      "x": [
+        "155",
+        0
+      ],
+      "y": 0,
+      "image": [
+        "133",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "ImageCrop"
+    }
+  },
+  "120": {
+    "inputs": {
+      "stitch": "right",
+      "feathering": 0,
+      "image_a": [
+        "117",
+        0
+      ],
+      "image_b": [
+        "118",
+        0
+      ]
+    },
+    "class_type": "Image Stitch",
+    "_meta": {
+      "title": "Image Stitch"
+    }
+  },
+  "121": {
+    "inputs": {
+      "filename_prefix": "stitched",
+      "images": [
+        "141",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "126": {
+    "inputs": {
+      "da_model": [
+        "129",
+        0
+      ],
+      "images": [
+        "127",
+        0
+      ]
+    },
+    "class_type": "DepthAnything_V2",
+    "_meta": {
+      "title": "Depth Anything V2"
+    }
+  },
+  "127": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "upscale_method": "nearest-exact",
+      "keep_proportion": true,
+      "divisible_by": 2,
+      "crop": "disabled",
+      "image": [
+        "138",
+        0
+      ]
+    },
+    "class_type": "ImageResizeKJ",
+    "_meta": {
+      "title": "Resize Image"
+    }
+  },
+  "128": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "126",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "129": {
+    "inputs": {
+      "model": "depth_anything_v2_vitl_fp16.safetensors"
+    },
+    "class_type": "DownloadAndLoadDepthAnythingV2Model",
+    "_meta": {
+      "title": "DownloadAndLoadDepthAnythingV2Model"
+    }
+  },
+  "130": {
+    "inputs": {
+      "image": "image.webp",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "133": {
+    "inputs": {
+      "stitch": "right",
+      "feathering": 0,
+      "image_a": [
+        "134",
+        0
+      ],
+      "image_b": [
+        "135",
+        0
+      ]
+    },
+    "class_type": "Image Stitch",
+    "_meta": {
+      "title": "Image Stitch"
+    }
+  },
+  "134": {
+    "inputs": {
+      "width": [
+        "158",
+        0
+      ],
+      "height": [
+        "109",
+        2
+      ],
+      "x": [
+        "158",
+        0
+      ],
+      "y": 0,
+      "image": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "Image Crop"
+    }
+  },
+  "135": {
+    "inputs": {
+      "width": [
+        "158",
+        0
+      ],
+      "height": [
+        "109",
+        2
+      ],
+      "x": 0,
+      "y": 0,
+      "image": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "Image Crop"
+    }
+  },
+  "138": {
+    "inputs": {
+      "stitch": "right",
+      "feathering": 0,
+      "image_a": [
+        "139",
+        0
+      ],
+      "image_b": [
+        "140",
+        0
+      ]
+    },
+    "class_type": "Image Stitch",
+    "_meta": {
+      "title": "Image Stitch"
+    }
+  },
+  "139": {
+    "inputs": {
+      "width": [
+        "161",
+        0
+      ],
+      "height": [
+        "160",
+        1
+      ],
+      "x": [
+        "161",
+        0
+      ],
+      "y": 0,
+      "image": [
+        "120",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "Image Crop"
+    }
+  },
+  "140": {
+    "inputs": {
+      "width": [
+        "161",
+        0
+      ],
+      "height": [
+        "160",
+        1
+      ],
+      "x": 0,
+      "y": 0,
+      "image": [
+        "120",
+        0
+      ]
+    },
+    "class_type": "ImageCrop",
+    "_meta": {
+      "title": "Image Crop"
+    }
+  },
+  "141": {
+    "inputs": {
+      "upscale_model": [
+        "142",
+        0
+      ],
+      "image": [
+        "138",
+        0
+      ]
+    },
+    "class_type": "ImageUpscaleWithModel",
+    "_meta": {
+      "title": "Upscale Image (using Model)"
+    }
+  },
+  "142": {
+    "inputs": {
+      "model_name": "RealESRGAN_x2.pth"
+    },
+    "class_type": "UpscaleModelLoader",
+    "_meta": {
+      "title": "Load Upscale Model"
+    }
+  },
+  "146": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "CR Value",
+    "_meta": {
+      "title": "⚙️ CR Value"
+    }
+  },
+  "148": {
+    "inputs": {
+      "image": [
+        "38",
+        0
+      ]
+    },
+    "class_type": "GetImageSizeAndCount",
+    "_meta": {
+      "title": "Get Image Size & Count"
+    }
+  },
+  "149": {
+    "inputs": {
+      "value": "a * b",
+      "a": [
+        "148",
+        2
+      ],
+      "b": [
+        "150",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "150": {
+    "inputs": {
+      "value": 0.5
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "151": {
+    "inputs": {
+      "value": "a * b",
+      "a": [
+        "109",
+        1
+      ],
+      "b": [
+        "152",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "152": {
+    "inputs": {
+      "value": 0.5
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "153": {
+    "inputs": {
+      "value": "a - b",
+      "a": [
+        "151",
+        0
+      ],
+      "b": [
+        "154",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "154": {
+    "inputs": {
+      "value": 128
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "155": {
+    "inputs": {
+      "value": "a + b",
+      "a": [
+        "151",
+        0
+      ],
+      "b": [
+        "154",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "156": {
+    "inputs": {
+      "value": "a * b",
+      "a": [
+        "154",
+        0
+      ],
+      "b": [
+        "157",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "157": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "158": {
+    "inputs": {
+      "value": "a * b",
+      "a": [
+        "109",
+        1
+      ],
+      "b": [
+        "159",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "159": {
+    "inputs": {
+      "value": 0.5
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  },
+  "160": {
+    "inputs": {
+      "image": [
+        "120",
+        0
+      ]
+    },
+    "class_type": "GetImageSize+",
+    "_meta": {
+      "title": "🔧 Get Image Size"
+    }
+  },
+  "161": {
+    "inputs": {
+      "value": "a * b",
+      "a": [
+        "160",
+        0
+      ],
+      "b": [
+        "162",
+        0
+      ]
+    },
+    "class_type": "SimpleMath+",
+    "_meta": {
+      "title": "🔧 Simple Math"
+    }
+  },
+  "162": {
+    "inputs": {
+      "value": 0.5
+    },
+    "class_type": "FloatConstant",
+    "_meta": {
+      "title": "Float Constant"
+    }
+  }
+}
