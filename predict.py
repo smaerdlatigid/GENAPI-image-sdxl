@@ -6,8 +6,8 @@ import zipfile
 from typing import List
 
 # uncomment to run cog predict
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 from PIL import Image
 from cog import BasePredictor, Input, Path
@@ -122,7 +122,7 @@ class Predictor(BasePredictor):
         ),
         upscale_by: float = Input(
             description="Upscale the image by this factor",
-            default=2.0
+            default=0.0
         ),
         upscale_steps: int = Input(
             description="Number of steps for upscaling",
@@ -158,15 +158,23 @@ class Predictor(BasePredictor):
         # load the workflow
         if input_file:
             EXAMPLE_WORKFLOW_JSON = WORKFLOWS['upscale-input']
+            self.cloud.bucket = BUCKETS['upscale']
         elif input_file_id:
             EXAMPLE_WORKFLOW_JSON = WORKFLOWS['upscale-input']
+            self.cloud.bucket = BUCKETS['upscale']
         else:
             if upscale_by > 1:
                 EXAMPLE_WORKFLOW_JSON = WORKFLOWS['upscale']
+                self.cloud.bucket = BUCKETS['upscale']
             else:
                 EXAMPLE_WORKFLOW_JSON = WORKFLOWS['base']
+                self.cloud.bucket = BUCKETS['base']
+                print(f"Using bucket: {self.cloud.bucket}")
+                print(f"Using workflow: {EXAMPLE_WORKFLOW_JSON}")
 
-        wf = self.comfyUI.load_workflow(EXAMPLE_WORKFLOW_JSON)
+        # load the workflow
+        with open(EXAMPLE_WORKFLOW_JSON, "r") as file:
+            wf = self.comfyUI.load_workflow(json.loads(file.read()))
 
         # handle input file
         if input_file:
