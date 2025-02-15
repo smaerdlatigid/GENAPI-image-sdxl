@@ -53,7 +53,13 @@ Then, run their respective scripts to install/download them and restart the serv
 Prior to creating a deployment, ensure the predict function works as expected. You can test this by running the following:
 
 ```sh
-cog predict -i prompt="magical glowing mushrooms in space with pyramids"
+cog predict -i prompt="surface of mars, glass geodesic dome buildings with plants inside" -i bucket=test
+```f
+
+Once you get a file_id back, you can use it to test the upscaling function:
+
+```sh
+cog predict -i input_file_id="4bb8848392a5e6f6190d6d6b75587182ea85132dc10764e3dacca077a5082dc3" -i upscale_by=2.0 -i bucket=test
 ```
 
 Build the docker image for deployment:
@@ -107,9 +113,11 @@ Inspect the container logs in docker to see if the request in action.
 
 `docker logs <container_id>` - View the logs of a container
 
+`docker rm $(docker ps -a -q)` - Remove all exited containers
+
 `docker rmi $(docker images -q)` - Remove all images
 
-`docker rm $(docker ps -a -q)` - Remove all exited containers
+`docker rmi $(docker images -f "dangling=true" -q)` - Remove all dangling images
 
 ## Extra
 

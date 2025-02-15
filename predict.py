@@ -116,10 +116,28 @@ class Predictor(BasePredictor):
             description="Negative prompt for image generation (e.g., 'boring, text, signature, watermark, low quality, bad quality, grainy, blurry, long neck, closed eyes')",
             default="boring, text, signature, watermark, low quality, bad quality, grainy, blurry"
         ),
-        lora_strength: float = Input(
-            description="Strength of the LoRA model",
-            default=1.0
+        # base generation
+        seed: int = Input(
+            description="Seed for the model, if negative will be random",
+            default=-1
         ),
+        cfg: float = Input(
+            description="CFG value for the model",
+            default=3.50
+        ),
+        steps: int = Input(
+            description="Number of steps for the model",
+            default=12
+        ),
+        sampler: str = Input( 
+            description="Sampler for the model",
+            default="dpmpp_sde"
+        ),
+        scheduler: str = Input(
+            description="Scheduler for the model",
+            default="ddim_uniform"
+        ),
+        # upscaling
         upscale_by: float = Input(
             description="Upscale the image by this factor",
             default=0.0
@@ -169,8 +187,9 @@ class Predictor(BasePredictor):
             else:
                 EXAMPLE_WORKFLOW_JSON = WORKFLOWS['base']
                 self.cloud.bucket = BUCKETS['base']
-                print(f"Using bucket: {self.cloud.bucket}")
-                print(f"Using workflow: {EXAMPLE_WORKFLOW_JSON}")
+
+        print(f"Using bucket: {self.cloud.bucket}")
+        print(f"Using workflow: {EXAMPLE_WORKFLOW_JSON}")
 
         # load the workflow
         with open(EXAMPLE_WORKFLOW_JSON, "r") as file:
@@ -187,7 +206,8 @@ class Predictor(BasePredictor):
             wf['6']['inputs']['text'] = prompt
             wf['6']['inputs']['text'] += ", " + suffix_prompt
             wf['7']['inputs']['text'] = negative_prompt
-
+        
+        # download image from cloud storage
         elif input_file_id:
             # build the path to image.webp
             cloud_path = f"{input_file_id.strip('/')}/image.webp"
@@ -205,24 +225,37 @@ class Predictor(BasePredictor):
             with open(f"{INPUT_DIR}/workflow.json", "r") as file:
                 wf_og = json.loads(file.read())
             
-            # update the workflow
+            # update the workflow using the original workflow
             wf['6']['inputs']['text'] = wf_og['6']['inputs']['text'] # prompt
             wf['7']['inputs']['text'] = wf_og['7']['inputs']['text'] # negative prompt
+
+            # force upscaling
+            if upscale_by <= 1:
+                upscale_by = 2.0
         else:
             # build the prompts
             wf['6']['inputs']['text'] = prompt
             wf['6']['inputs']['text'] += ", " + suffix_prompt
             wf['7']['inputs']['text'] = negative_prompt
 
+            # base generation settings
+            wf['11']['inputs']['cfg'] = cfg
+            wf['11']['inputs']['steps'] = steps
+            wf['11']['inputs']['sampler_name'] = sampler
+            wf['11']['inputs']['scheduler'] = scheduler
     
         # connect to comfyUI
         self.comfyUI.connect()
 
-        # lora config
-        wf['10']['inputs']['strength_model'] = lora_strength
-
         # seed
         self.comfyUI.randomise_seeds(wf)
+
+        if seed > 0:
+            # only use for base generation side
+            if EXAMPLE_WORKFLOW_JSON == WORKFLOWS['base']:
+                wf['11']['inputs']['seed'] = seed
+            elif EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale']:
+                wf['7']['inputs']['seed'] = seed
 
         # upscaling
         if upscale_by > 1:
@@ -244,8 +277,10 @@ class Predictor(BasePredictor):
 
         # convert images to webp
         saved_images = []
+        sizes = []
         for img in images:
             image = Image.open(img)
+            sizes.append(image.size)
             optimised_file_path = img.with_suffix(f".{output_format}")
             image.save(
                 optimised_file_path,
@@ -335,10 +370,15 @@ class Predictor(BasePredictor):
         # create a metadata json
         metadata = {
             "id": image_hash,
+            "width": sizes[1][0], # first is depth, second is rgb
+            "height": sizes[1][1],
             "prompt": prompt,
             "suffix_prompt": suffix_prompt,
             "negative_prompt": negative_prompt,
-            "lora_strength": lora_strength,
+            "cfg": cfg,
+            "steps": steps,
+            "sampler": sampler,
+            "scheduler": scheduler,
             "upscale_by": upscale_by,
             "upscale_steps": upscale_steps,
             "upscale_sampler": upscale_sampler,
@@ -352,6 +392,14 @@ class Predictor(BasePredictor):
             "depth_thumbnail_url": depth_thumbnail_url,
             "workflow_url": workflow_url
         }
+
+        # grab seeds for base generation
+        if EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale']:
+            metadata['seed'] = wf['97']['inputs']['seed']
+        elif EXAMPLE_WORKFLOW_JSON == WORKFLOWS['base']:
+            metadata['seed'] = wf['11']['inputs']['seed']
+        else:
+            metadata['seed'] = -1
 
         with open(f"{saved_images[0].parent}/metadata.json", "w") as file:
             file.write(json.dumps(metadata, indent=4))
