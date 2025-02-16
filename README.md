@@ -87,22 +87,30 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "input": {
-    "prompt": "Magical mushroom forest in space",
+    "bucket": "360-panorama-sdxl",
+    "prompt": "Glowing mushrooms around pyramids amidst a cosmic backdrop",
     "suffix_prompt": "equirectangular, 360 panorama",
     "negative_prompt": "boring, text, signature, watermark, low quality, bad quality, grainy, blurry",
-    "width": 2048,
-    "height": 1024,
     "seed": -1,
-    "lora_strength": 1.0,
-    "cfg": 4.20,
-    "steps": 10,
-    "sampler": "dpmpp_sde_gpu",
-    "scheduler": "karras",
-    "tile_x": true,
-    "tile_y": false,
+    "cfg": 3.5,
+    "steps": 12,
+    "sampler": "dpmpp_sde",
+    "scheduler": "ddim_uniform",
+    "upscale_by": 0,
+    "upscale_steps": 10,
+    "upscale_sampler": "uni_pc",
+    "upscale_scheduler": "beta",
+    "upscale_denoise": 0.3,
+    "upscale_seed": -1,
     "output_format": "webp"
   }
 }'
+```
+
+You can test the upscaling function by adding the `input_file_id` from the previous request:
+
+```
+"input_file_id":"88837afa2c321b0e81e67c77f515284d037b8fa5b5834acc4f8cb35944681185",
 ```
 
 Inspect the container logs in docker to see if the request in action.
