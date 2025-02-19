@@ -20,7 +20,7 @@ def load_image(equi_img_path):
     return np.transpose(equi_img, (2, 0, 1))
 
 def generate_perspective_view(equi_img, rots, height, width, fov_x):
-    equi2pers = Equi2Pers(height=height, width=width, fov_x=fov_x, mode="bilinear")
+    equi2pers = Equi2Pers(height=height, width=width, fov_x=fov_x, mode="nearest")
     return equi2pers(equi=equi_img, rots=rots)
 
 def create_video_commands(output_dir, fps, width, height, gif_width, gif_height):
@@ -57,7 +57,7 @@ def cleanup_frames(output_dir):
         os.remove(file)
     print(f"Cleaned up {len(frame_files)} frame files.")
 
-def main(input_path, output_dir='output', fps=30, width=640, height=None, 
+def create_animation(input_path, output_dir='output', fps=30, width=640, height=None, 
          aspect_ratio=16/9, fov=90.0, num_frames=72, gif_size=None, cleanup=False):
     """
     Main function to create animated rotation from equirectangular image.
@@ -144,17 +144,17 @@ if __name__ == "__main__":
                         help='Path to the input equirectangular image')
     parser.add_argument('--output_dir', type=str, default='images',
                         help='Directory to store frames (default: images)')
-    parser.add_argument('--fps', type=int, default=20,
+    parser.add_argument('--fps', type=int, default=30,
                         help='Frames per second for animation (default: 20)')
-    parser.add_argument('--width', type=int, default=420,
-                        help='Width of the output frames (default: 420)')
+    parser.add_argument('--width', type=int, default=720,
+                        help='Width of the output frames (default: 720)')
     parser.add_argument('--height', type=int, default=None,
                         help='Height of the output frames (default: calculated from aspect ratio)')
-    parser.add_argument('--aspect_ratio', type=float, default=9/19.5,
+    parser.add_argument('--aspect_ratio', type=float, default=9/16,
                         help='Aspect ratio (width/height) for the output (default: 19.5/9)')
     parser.add_argument('--fov', type=float, default=70.0,
                         help='Field of view in degrees (default: 70.0)')
-    parser.add_argument('--num_frames', type=int, default=180,
+    parser.add_argument('--num_frames', type=int, default=240,
                         help='Number of frames in the animation (default: 180)')
     parser.add_argument('--gif_size', type=int, default=200,
                         help='Height of the GIF in pixels (default: 200)')
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Run main function with parsed arguments
-    main(
+    create_animation(
         input_path=args.input_path,
         output_dir=args.output_dir,
         fps=args.fps,
