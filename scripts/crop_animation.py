@@ -154,7 +154,7 @@ if __name__ == "__main__":
                         help='Aspect ratio (width/height) for the output (default: 19.5/9)')
     parser.add_argument('--fov', type=float, default=70.0,
                         help='Field of view in degrees (default: 70.0)')
-    parser.add_argument('--num_frames', type=int, default=240,
+    parser.add_argument('--num_frames', type=int, default=300,
                         help='Number of frames in the animation (default: 180)')
     parser.add_argument('--gif_size', type=int, default=200,
                         help='Height of the GIF in pixels (default: 200)')
