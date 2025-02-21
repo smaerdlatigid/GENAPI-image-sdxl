@@ -26,8 +26,8 @@ def generate_perspective_view(equi_img, rots, height, width, fov_x):
 def create_video_commands(output_dir, fps, width, height, gif_width, gif_height):
     input_pattern = os.path.join(output_dir, 'frame_%03d.png')
     mp4_output = os.path.join(output_dir, 'animation.mp4')
-    gif_output = os.path.join(output_dir, 'animation.gif')
-    palette_path = os.path.join(output_dir, 'palette.png')
+    #gif_output = os.path.join(output_dir, 'animation.gif')
+    #palette_path = os.path.join(output_dir, 'palette.png')
 
     commands = {
         'mp4': (
@@ -35,20 +35,20 @@ def create_video_commands(output_dir, fps, width, height, gif_width, gif_height)
             f'-c:v libx264 -pix_fmt yuv420p -crf 23 '
             f'-vf "scale={width}:{height}" "{mp4_output}"'
         ),
-        'palette': (
-            f'ffmpeg -y -i "{mp4_output}" -vf '
-            f'"fps={fps},scale={gif_width}:{gif_height}:flags=lanczos,'
-            f'palettegen=max_colors=128:stats_mode=single" '
-            f'"{palette_path}"'
-        ),
-        'gif': (
-            f'ffmpeg -y -i "{mp4_output}" -i "{palette_path}" -lavfi '
-            f'"fps={fps},scale={gif_width}:{gif_height}:flags=lanczos[x];'
-            f'[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" '
-            f'-loop 0 "{gif_output}"'
-        )
+        # 'palette': (
+        #     f'ffmpeg -y -i "{mp4_output}" -vf '
+        #     f'"fps={fps},scale={gif_width}:{gif_height}:flags=lanczos,'
+        #     f'palettegen=max_colors=128:stats_mode=single" '
+        #     f'"{palette_path}"'
+        # ),
+        # 'gif': (
+        #     f'ffmpeg -y -i "{mp4_output}" -i "{palette_path}" -lavfi '
+        #     f'"fps={fps},scale={gif_width}:{gif_height}:flags=lanczos[x];'
+        #     f'[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" '
+        #     f'-loop 0 "{gif_output}"'
+        # )
     }
-    return commands, palette_path
+    return commands#, palette_path
 
 def cleanup_frames(output_dir):
     """Remove all frame files from the output directory."""
@@ -112,22 +112,22 @@ def create_animation(input_path, output_dir='output', fps=30, width=640, height=
         cv2.imwrite(os.path.join(output_dir, f"frame_{i:03d}.png"), frame)
 
     # Create video and GIF
-    commands, palette_path = create_video_commands(
+    commands = create_video_commands(
         output_dir, fps, width, height, gif_width, gif_height
     )
 
     print("\nCreating MP4...")
     os.system(commands['mp4'])
     
-    print("Generating color palette...")
-    os.system(commands['palette'])
+    # print("Generating color palette...")
+    # os.system(commands['palette'])
     
-    print("Creating optimized GIF...")
-    os.system(commands['gif'])
+    # print("Creating optimized GIF...")
+    # os.system(commands['gif'])
 
     # Cleanup
-    if os.path.exists(palette_path):
-        os.remove(palette_path)
+    # if os.path.exists(palette_path):
+    #     os.remove(palette_path)
 
     # Clean up frame files if requested
     if cleanup:
@@ -146,21 +146,20 @@ if __name__ == "__main__":
                         help='Directory to store frames (default: images)')
     parser.add_argument('--fps', type=int, default=30,
                         help='Frames per second for animation (default: 20)')
-    parser.add_argument('--width', type=int, default=720,
-                        help='Width of the output frames (default: 720)')
+    parser.add_argument('--width', type=int, default=768,
+                        help='Width of the output frames (default: 768)')
     parser.add_argument('--height', type=int, default=None,
                         help='Height of the output frames (default: calculated from aspect ratio)')
     parser.add_argument('--aspect_ratio', type=float, default=9/16,
-                        help='Aspect ratio (width/height) for the output (default: 19.5/9)')
+                        help='Aspect ratio (width/height) for the output (default: 9/16, portrait)')
     parser.add_argument('--fov', type=float, default=70.0,
                         help='Field of view in degrees (default: 70.0)')
     parser.add_argument('--num_frames', type=int, default=300,
                         help='Number of frames in the animation (default: 180)')
-    parser.add_argument('--gif_size', type=int, default=200,
-                        help='Height of the GIF in pixels (default: 200)')
-    parser.add_argument('--cleanup', action='store_true',
-                        help='Remove frame files after creating animation')
-
+    # parser.add_argument('--gif_size', type=int, default=200,
+    #                     help='Height of the GIF in pixels (default: 200)')
+    parser.add_argument('--save_frames', type=bool, default=False,
+                        help='Save frames to disk (default: False)')
     args = parser.parse_args()
 
     # Validate inputs
@@ -190,6 +189,6 @@ if __name__ == "__main__":
         aspect_ratio=args.aspect_ratio,
         fov=args.fov,
         num_frames=args.num_frames,
-        gif_size=args.gif_size,
-        cleanup=args.cleanup
+        #gif_size=args.gif_size,
+        cleanup=not args.save_frames
     )

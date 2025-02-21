@@ -128,7 +128,7 @@
   "97": {
     "inputs": {
       "seed": 945136699822492,
-      "steps": 6,
+      "steps": 7,
       "cfg": 2,
       "sampler_name": "euler",
       "scheduler": "beta",
