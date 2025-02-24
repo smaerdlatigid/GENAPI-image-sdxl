@@ -138,7 +138,7 @@ def create_animation(input_path, output_dir='output', fps=30, width=640, height=
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description='Generate animated rotation of an equirectangular image')
     parser.add_argument('--input_path', type=str, required=True,
                         help='Path to the input equirectangular image')
