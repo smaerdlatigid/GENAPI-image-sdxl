@@ -220,7 +220,7 @@ class MinioStorageManager:
         return sha3_hash.hexdigest()
 
     @staticmethod
-    def resize_image(img_path, target_size=(200, 100)):
+    def resize_image(img_path, target_size=(512, 256)):
         """Resizes an image to a thumbnail while maintaining the aspect ratio"""
         img = Image.open(str(img_path))
         w, h = img.size

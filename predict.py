@@ -3,6 +3,7 @@ import json
 import shutil
 import tarfile
 import zipfile
+import threading
 from typing import List
 
 # uncomment to run cog predict
@@ -14,9 +15,11 @@ from cog import BasePredictor, Input, Path
 from comfyui import ComfyUI
 
 from minio_manager import MinioStorageManager as CloudStorageManager
+from scripts.crop_animation import create_animation
 
 OUTPUT_DIR = "/tmp/outputs"
 INPUT_DIR = "/tmp/inputs"
+ANIMATION_DIR = "/tmp/animation"
 COMFYUI_TEMP_OUTPUT_DIR = "ComfyUI/temp"
 ALL_DIRECTORIES = [OUTPUT_DIR, INPUT_DIR, COMFYUI_TEMP_OUTPUT_DIR]
 
@@ -30,6 +33,11 @@ BUCKETS = {
     'base': os.environ.get('BUCKET_IMAGE', '360-panorama-sdxl'),
     'upscale': os.environ.get('BUCKET_IMAGE_UPSCALE', '360-panorama-sdxl-upscale')
 }
+
+def cleanup_animation_thread(thread):
+    """Helper function to join animation thread"""
+    thread.join()
+    print("Animation processing completed")
 
 
 class Predictor(BasePredictor):
@@ -49,6 +57,7 @@ class Predictor(BasePredictor):
             self.cloud.list_buckets()
         except Exception as e:
             raise(f"Failed to connect to Minio: {e}\ntry adjusting environment variables")
+
 
 
     def handle_input_file(self, input_file: Path):
@@ -100,7 +109,7 @@ class Predictor(BasePredictor):
             description="Input image to download from cloud storage",
             default=None,
         ),
-        bucket: str = Input(
+        bucket: str = Input( # uses input_file_id as directory
             description="Bucket to upscale image from on cloud storage",
             default="360-panorama-sdxl"
         ),
@@ -167,7 +176,6 @@ class Predictor(BasePredictor):
             choices=["webp", "jpg", "png"],
             default="webp",
         )
-        
         ) -> List[str]:
 
         # clean up directories
@@ -415,6 +423,74 @@ class Predictor(BasePredictor):
             else:
                 metadata_url = None
 
-        # TODO create animations if upscale_by > 1
+        # create animations if upscale_by > 1
+        if EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale'] or EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale-input']:
+
+            # Start animation creation in background
+            animation_thread = threading.Thread(
+                target=self.create_animation_background,
+                args=(str(saved_images[1]), image_hash, self.cloud)
+            )
+            animation_thread.start()
+
+            # Create cleanup thread
+            cleanup_thread = threading.Thread(
+                target=cleanup_animation_thread, 
+                args=(animation_thread,)
+            )
+            cleanup_thread.daemon = True  # Only the cleanup thread is daemonized
+            cleanup_thread.start()
+
+            # uncomment when testing with cog predict
+            # import time
+            # time.sleep(90)
 
         return [depth_url, image_url, metadata_url]
+    
+    @staticmethod
+    def create_animation_background(image_path, image_hash, cloud_manager):
+        """
+        Background task to create and upload animation files.
+        
+        Args:
+            image_path (str): Path to the input image
+            image_hash (str): Hash/ID of the image
+            cloud_manager: Instance of CloudStorageManager
+        """
+        try:
+            # Create temporary directory for animation
+            animation_dir = os.path.join(ANIMATION_DIR, f"animation_{image_hash}")
+            os.makedirs(animation_dir, exist_ok=True)
+
+            # Create animation
+            create_animation(
+                input_path=image_path,
+                output_dir=animation_dir,
+                fps=30,
+                width=768,
+                aspect_ratio=9./16,  # For equirectangular images
+                fov=70.0,
+                num_frames=300,
+                cleanup=True
+            )
+
+            # Upload animation files
+            try:
+                # Upload MP4
+                mp4_path = os.path.join(animation_dir, "animation.mp4")
+                if os.path.exists(mp4_path):
+                    mp4_url = cloud_manager.upload_file(
+                        mp4_path, 
+                        f"{image_hash}/animation.mp4",
+                        'video/mp4'
+                    )
+                    print(f"Animation MP4 uploaded to: {mp4_url}")
+
+            except Exception as e:
+                print(f"Failed to upload animation files: {e}")
+
+            # Cleanup
+            shutil.rmtree(animation_dir, ignore_errors=True)
+
+        except Exception as e:
+            print(f"Failed to create animation: {e}")

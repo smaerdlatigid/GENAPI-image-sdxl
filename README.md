@@ -50,19 +50,19 @@ Then, run their respective scripts to install/download them and restart the serv
 
 ## Deployment
 
-Prior to creating a deployment, ensure the predict function works as expected. You can test this by running the following:
+Prior to creating a deployment, ensure the predict function works as expected. Modify the `predict.py` file to use a dot env file by uncommenting the import. Then, set the `BUCKET_IMAGE` to `test` in `.env`. Run the following command to test the predict function:
 
 ```sh
-cog predict -i prompt="surface of mars, glass geodesic dome buildings with plants inside" -i bucket=test
-```f
+cog predict -i prompt="surface of mars, glass geodesic domes"
+```
 
 Once you get a file_id back, you can use it to test the upscaling function:
 
 ```sh
-cog predict -i input_file_id="4bb8848392a5e6f6190d6d6b75587182ea85132dc10764e3dacca077a5082dc3" -i upscale_by=2.0 -i bucket=test
+cog predict -i input_file_id="a10375cee81e7fbd27251104593d82347f87d71a837c1c52262af82380585ac3" -i upscale_by=2.0 -i bucket=test
 ```
 
-Build the docker image for deployment:
+After successfully testing the predict function, you can proceed with deployment. Comment the import for dotenv and revert the bucket names to their original values. Build the docker image for deployment:
 
 ```sh
 cog build -t 360-panorama-sdxl
@@ -74,11 +74,11 @@ Start the microservice:
 docker run -d -p 7777:5000 --env-file ./.env --gpus all --name 360-panorama-sdxl 360-panorama-sdxl
 ```
 
-Make sure all of the environment variables are set correctly. Inspect the API docs in your browser at [http://localhost:7777/docs](). 
+Inspect the API docs in your browser at [http://localhost:7777/docs](). 
 
 ### Testing
 
-Make sure the microservice is running and then test using:
+Make sure the microservice is running and then test the endpoint:
 
 ```sh
 curl -X 'POST' \
@@ -87,7 +87,6 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "input": {
-    "bucket": "360-panorama-sdxl",
     "prompt": "Glowing mushrooms around pyramids amidst a cosmic backdrop",
     "suffix_prompt": "equirectangular, 360 panorama",
     "negative_prompt": "boring, text, signature, watermark, low quality, bad quality, grainy, blurry",
@@ -97,6 +96,23 @@ curl -X 'POST' \
     "sampler": "dpmpp_sde",
     "scheduler": "ddim_uniform",
     "upscale_by": 0,
+    "output_format": "webp"
+  }
+}'
+```
+
+You can test the upscaling function by adding the `input_file_id` from the previous request:
+
+```sh
+curl -X 'POST' \
+  'http://localhost:7777/predictions' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "input": {
+    "input_file_id":"8ece5d15f617616babd5bc74288e10d187fe3df3a21e0a3a8619a98c187468ed",
+    "bucket": "360-panorama-sdxl",
+    "upscale_by": 2,
     "upscale_steps": 10,
     "upscale_sampler": "uni_pc",
     "upscale_scheduler": "beta",
@@ -105,12 +121,6 @@ curl -X 'POST' \
     "output_format": "webp"
   }
 }'
-```
-
-You can test the upscaling function by adding the `input_file_id` from the previous request:
-
-```
-"input_file_id":"88837afa2c321b0e81e67c77f515284d037b8fa5b5834acc4f8cb35944681185",
 ```
 
 Inspect the container logs in docker to see if the request in action.
@@ -127,13 +137,29 @@ Inspect the container logs in docker to see if the request in action.
 
 `docker rmi $(docker images -f "dangling=true" -q)` - Remove all dangling images
 
-## Extra
+### Mosaic Settings
 
-Create a mosaic to assess the best performing parameters
+Create a mosaic to assess the best performing parameters (sampler, scheduler, steps, cfg, etc.)
 
 1. Change `BUCKET_IMAGE` in [.env]() to `test`
-2. Start the microservice and mount the images dir: `-v ./images:/src/images`
+2. Start the microservice using the command above but add: `-v ./images:/src/images`
 3. Go into the container: `docker exec -it 360-panorama-sdxl bash`
 4. Run the script: `./scripts/mosaic_settings.py`
 
 ![](images/mosaic_zoomed.png)
+
+### Cropped Animation 
+
+To make a cropped animation from a 360 panorama:
+
+1. Start the docker container in interactive mode:
+
+```sh
+docker run -it --rm -v ./images:/src/images --env-file ./.env --gpus 0 --name 360-panorama-sdxl-worker 360-panorama-sdxl bash
+```
+
+2. Run the script:
+
+```sh
+python scripts/crop_animation.py --input_path images/test_1.webp`
+```
