@@ -87,7 +87,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "input": {
-    "prompt": "Glowing mushrooms around pyramids amidst a cosmic backdrop",
+    "prompt": "glowing UFO, pyramids, cosmic backdrop",
     "suffix_prompt": "equirectangular, 360 panorama",
     "negative_prompt": "boring, text, signature, watermark, low quality, bad quality, grainy, blurry",
     "seed": -1,
@@ -110,7 +110,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "input": {
-    "input_file_id":"b1b9e6db0a9eac4758f367063bb4016fd2fb49f818e5fdd86fd52c6324b499dd",
+    "input_file_id":"3eeb7c7200ed797f9b2a6a7d2e7c1102ef34a6ef9cfb9ea2242f1e4596fe9f79",
     "upscale_by": 2,
     "upscale_steps": 10,
     "upscale_sampler": "uni_pc",

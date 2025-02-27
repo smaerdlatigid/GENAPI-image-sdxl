@@ -3,11 +3,12 @@ import json
 import shutil
 import tarfile
 import zipfile
-import threading
+from concurrent.futures import ThreadPoolExecutor
 from typing import List
 import numpy as np
 
-# uncomment to run cog predict
+# uncomment to run "cog predict ..."
+# otherwise start the docker image with --env-file .env
 #from dotenv import load_dotenv
 #load_dotenv()
 
@@ -59,6 +60,8 @@ class Predictor(BasePredictor):
             self.cloud.list_buckets()
         except Exception as e:
             raise(f"Failed to connect to Minio: {e}\ntry adjusting environment variables")
+
+        self.executor = ThreadPoolExecutor(max_workers=3)
 
     def handle_input_file(self, input_file: Path):
         file_extension = self.get_file_extension(input_file)
@@ -281,18 +284,7 @@ class Predictor(BasePredictor):
         images = self.comfyUI.get_files(output_directories)
 
         # convert images to webp
-        saved_images = []
-        sizes = []
-        for img in images:
-            image = Image.open(img)
-            sizes.append(image.size)
-            optimised_file_path = img.with_suffix(f".{output_format}")
-            image.save(
-                optimised_file_path,
-                quality=100,
-                optimize=True,
-            )
-            saved_images.append(optimised_file_path)
+        saved_images, sizes = self.optimize_images(images, output_format)
 
         # back up images on cloud storage
         image_hash = self.cloud.hash_file(saved_images[1])
@@ -424,26 +416,14 @@ class Predictor(BasePredictor):
         if EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale'] or EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale-input']:
 
             # Create embeddings in background
-            embeddings_thread = threading.Thread(
-                target=self.create_embeddings_background,
-                args=(str(saved_images[1]), prompt, image_hash, self.cloud)
+            future_embedding = self.executor.submit(
+                self.create_embeddings_background, 
+                str(saved_images[1]), prompt, image_hash, self.cloud
             )
-            embeddings_thread.start()
-
-            # Start animation creation in background
-            animation_thread = threading.Thread(
-                target=self.create_animation_background,
-                args=(str(saved_images[1]), image_hash, self.cloud)
+            future_animation = self.executor.submit(
+                self.create_animation_background,
+                str(saved_images[1]), image_hash, self.cloud
             )
-            animation_thread.start()
-
-            # Create cleanup thread
-            cleanup_thread = threading.Thread(
-                target=cleanup_animation_thread, 
-                args=(animation_thread,)
-            )
-            cleanup_thread.daemon = True  # Only the cleanup thread is daemonized
-            cleanup_thread.start()
 
         return [depth_url, image_url, metadata_url]
 
@@ -551,3 +531,25 @@ class Predictor(BasePredictor):
 
         except Exception as e:
             print(f"Failed to create animation: {e}")
+
+    # Add batch processing for images
+    def optimize_images(self, images, output_format):
+        results = []
+        sizes = []
+        
+        for img_path in images:
+            with Image.open(img_path) as image:
+                sizes.append(image.size)
+                optimized_path = img_path.with_suffix(f".{output_format}")
+                
+                # Use save parameters based on format
+                if output_format == "webp":
+                    image.save(optimized_path, quality=99, method=6)  # Better compression
+                elif output_format == "jpg":
+                    image.save(optimized_path, quality=95, optimize=True)
+                else:  # png
+                    image.save(optimized_path, optimize=True)
+                    
+                results.append(optimized_path)
+        
+        return results, sizes

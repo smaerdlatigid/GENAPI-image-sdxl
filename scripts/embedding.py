@@ -3,6 +3,7 @@ import torch
 from PIL import Image
 import open_clip
 import requests
+from functools import lru_cache
 
 class ImageTextEmbedding:
     def __init__(self, model_name='hf-hub:laion/CLIP-ViT-B-32-laion2B-s34B-b79K', device='cuda' if torch.cuda.is_available() else 'cpu'):
@@ -16,6 +17,7 @@ class ImageTextEmbedding:
         self.model.eval()
         self.tokenizer = open_clip.get_tokenizer(model_name)
 
+    @lru_cache(maxsize=32)
     def encode_image(self, image_input):
         """Encode image from either a file path or URL"""
         if isinstance(image_input, str):
