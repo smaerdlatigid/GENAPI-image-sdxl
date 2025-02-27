@@ -3,12 +3,14 @@ import json
 import shutil
 import tarfile
 import zipfile
-import threading
+from concurrent.futures import ThreadPoolExecutor
 from typing import List
+import numpy as np
 
-# uncomment to run cog predict
-from dotenv import load_dotenv
-load_dotenv()
+# uncomment to run "cog predict ..."
+# otherwise start the docker image with --env-file .env
+#from dotenv import load_dotenv
+#load_dotenv()
 
 from PIL import Image
 from cog import BasePredictor, Input, Path
@@ -16,6 +18,7 @@ from comfyui import ComfyUI
 
 from minio_manager import MinioStorageManager as CloudStorageManager
 from scripts.crop_animation import create_animation
+from scripts.embedding import ImageTextEmbedding
 
 OUTPUT_DIR = "/tmp/outputs"
 INPUT_DIR = "/tmp/inputs"
@@ -58,7 +61,7 @@ class Predictor(BasePredictor):
         except Exception as e:
             raise(f"Failed to connect to Minio: {e}\ntry adjusting environment variables")
 
-
+        self.executor = ThreadPoolExecutor(max_workers=3)
 
     def handle_input_file(self, input_file: Path):
         file_extension = self.get_file_extension(input_file)
@@ -108,10 +111,6 @@ class Predictor(BasePredictor):
         input_file_id: str = Input(
             description="Input image to download from cloud storage",
             default=None,
-        ),
-        bucket: str = Input( # uses input_file_id as directory
-            description="Bucket to upscale image from on cloud storage",
-            default="360-panorama-sdxl"
         ),
         prompt: str = Input(
             description="Describe the image",
@@ -184,18 +183,19 @@ class Predictor(BasePredictor):
         # load the workflow
         if input_file:
             EXAMPLE_WORKFLOW_JSON = WORKFLOWS['upscale-input']
-            self.cloud.bucket = BUCKETS['upscale']
+            bucket = BUCKETS['upscale']
         elif input_file_id:
             EXAMPLE_WORKFLOW_JSON = WORKFLOWS['upscale-input']
-            self.cloud.bucket = BUCKETS['upscale']
+            bucket = BUCKETS['upscale']
         else:
             if upscale_by > 1:
                 EXAMPLE_WORKFLOW_JSON = WORKFLOWS['upscale']
-                self.cloud.bucket = BUCKETS['upscale']
+                bucket = BUCKETS['upscale']
             else:
                 EXAMPLE_WORKFLOW_JSON = WORKFLOWS['base']
-                self.cloud.bucket = BUCKETS['base']
+                bucket = BUCKETS['base']
 
+        self.cloud.bucket = bucket
         print(f"Using bucket: {self.cloud.bucket}")
         print(f"Using workflow: {EXAMPLE_WORKFLOW_JSON}")
 
@@ -221,14 +221,14 @@ class Predictor(BasePredictor):
             cloud_path = f"{input_file_id.strip('/')}/image.webp"
 
             # download the input file from cloud storage
-            input_file = self.cloud.download_file_to_disk(cloud_path, f"{INPUT_DIR}/input.webp", bucket)
+            input_file = self.cloud.download_file_to_disk(cloud_path, f"{INPUT_DIR}/input.webp", BUCKETS['base'])
 
             # Update the input file in the workflow JSON
             wf['130']['inputs']['image'] = os.path.join(INPUT_DIR, f"input.webp")
 
             # download + parse workflow
             cloud_path = f"{input_file_id.strip('/')}/workflow.json"
-            self.cloud.download_file_to_disk(cloud_path, f"{INPUT_DIR}/workflow.json", bucket)
+            self.cloud.download_file_to_disk(cloud_path, f"{INPUT_DIR}/workflow.json", BUCKETS['base'])
 
             with open(f"{INPUT_DIR}/workflow.json", "r") as file:
                 wf_og = json.loads(file.read())
@@ -284,18 +284,7 @@ class Predictor(BasePredictor):
         images = self.comfyUI.get_files(output_directories)
 
         # convert images to webp
-        saved_images = []
-        sizes = []
-        for img in images:
-            image = Image.open(img)
-            sizes.append(image.size)
-            optimised_file_path = img.with_suffix(f".{output_format}")
-            image.save(
-                optimised_file_path,
-                quality=100,
-                optimize=True,
-            )
-            saved_images.append(optimised_file_path)
+        saved_images, sizes = self.optimize_images(images, output_format)
 
         # back up images on cloud storage
         image_hash = self.cloud.hash_file(saved_images[1])
@@ -426,27 +415,75 @@ class Predictor(BasePredictor):
         # create animations if upscale_by > 1
         if EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale'] or EXAMPLE_WORKFLOW_JSON == WORKFLOWS['upscale-input']:
 
-            # Start animation creation in background
-            animation_thread = threading.Thread(
-                target=self.create_animation_background,
-                args=(str(saved_images[1]), image_hash, self.cloud)
+            # Create embeddings in background
+            future_embedding = self.executor.submit(
+                self.create_embeddings_background, 
+                str(saved_images[1]), prompt, image_hash, self.cloud
             )
-            animation_thread.start()
-
-            # Create cleanup thread
-            cleanup_thread = threading.Thread(
-                target=cleanup_animation_thread, 
-                args=(animation_thread,)
+            future_animation = self.executor.submit(
+                self.create_animation_background,
+                str(saved_images[1]), image_hash, self.cloud
             )
-            cleanup_thread.daemon = True  # Only the cleanup thread is daemonized
-            cleanup_thread.start()
-
-            # uncomment when testing with cog predict
-            # import time
-            # time.sleep(90)
 
         return [depth_url, image_url, metadata_url]
-    
+
+    @staticmethod 
+    def create_embeddings_background(image_path: str, prompt: str, image_hash: str, cloud_manager):
+        """
+        Background task to create and upload CLIP embeddings for the image and prompt.
+        Takes multiple perspective crops (front, back, up, down) from the equirectangular image.
+        
+        Args:
+            image_path (str): Path to the input equirectangular image
+            prompt (str): Text prompt used to generate the image
+            image_hash (str): Hash/ID of the image
+            cloud_manager: Instance of CloudStorageManager
+        """
+        try:
+
+            # Initialize CLIP model
+            embedding_model = ImageTextEmbedding()
+
+            # Get text embedding
+            text_embedding = embedding_model.encode_text([prompt])
+            text_embedding_np = text_embedding.cpu().numpy()
+
+            # Get embedding for the full equirectangular image
+            full_image_embedding = embedding_model.encode_image(image_path)
+            full_image_embedding_np = full_image_embedding.cpu().numpy()
+            
+            # Combine all embeddings into a single numpy array
+            # First row: prompt embedding
+            # Second row: full equirectangular image embedding
+            # Following rows: perspective view embeddings
+            combined_embeddings = np.vstack([
+                text_embedding_np,
+                full_image_embedding_np
+            ])
+
+            # Save embeddings to temporary file
+            temp_path = f"/tmp/embeddings_{image_hash}.npy"
+            np.save(temp_path, combined_embeddings)
+
+            try:
+                # Upload embeddings file
+                embeddings_url = cloud_manager.upload_file(
+                    temp_path,
+                    f"{image_hash}/embeddings.npy",
+                    'application/octet-stream'
+                )
+                print(f"Embeddings uploaded to: {embeddings_url}")
+            except Exception as e:
+                print(f"Failed to upload embeddings: {e}")
+
+            # Cleanup
+            os.remove(temp_path)
+
+        except Exception as e:
+            print(f"Failed to create embeddings: {str(e)}")
+            import traceback
+            traceback.print_exc()
+
     @staticmethod
     def create_animation_background(image_path, image_hash, cloud_manager):
         """
@@ -494,3 +531,25 @@ class Predictor(BasePredictor):
 
         except Exception as e:
             print(f"Failed to create animation: {e}")
+
+    # Add batch processing for images
+    def optimize_images(self, images, output_format):
+        results = []
+        sizes = []
+        
+        for img_path in images:
+            with Image.open(img_path) as image:
+                sizes.append(image.size)
+                optimized_path = img_path.with_suffix(f".{output_format}")
+                
+                # Use save parameters based on format
+                if output_format == "webp":
+                    image.save(optimized_path, quality=99, method=6)  # Better compression
+                elif output_format == "jpg":
+                    image.save(optimized_path, quality=95, optimize=True)
+                else:  # png
+                    image.save(optimized_path, optimize=True)
+                    
+                results.append(optimized_path)
+        
+        return results, sizes

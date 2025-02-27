@@ -59,7 +59,7 @@ cog predict -i prompt="surface of mars, glass geodesic domes"
 Once you get a file_id back, you can use it to test the upscaling function:
 
 ```sh
-cog predict -i input_file_id="a10375cee81e7fbd27251104593d82347f87d71a837c1c52262af82380585ac3" -i upscale_by=2.0 -i bucket=test
+cog predict -i input_file_id="49082b8a207de22ac76e83b2f1812f964d5bfd656b695cdaa1b45706f276459a" -i upscale_by=2.0
 ```
 
 After successfully testing the predict function, you can proceed with deployment. Comment the import for dotenv and revert the bucket names to their original values. Build the docker image for deployment:
@@ -87,7 +87,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "input": {
-    "prompt": "Glowing mushrooms around pyramids amidst a cosmic backdrop",
+    "prompt": "glowing UFO, pyramids, cosmic backdrop",
     "suffix_prompt": "equirectangular, 360 panorama",
     "negative_prompt": "boring, text, signature, watermark, low quality, bad quality, grainy, blurry",
     "seed": -1,
@@ -110,8 +110,7 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "input": {
-    "input_file_id":"8ece5d15f617616babd5bc74288e10d187fe3df3a21e0a3a8619a98c187468ed",
-    "bucket": "360-panorama-sdxl",
+    "input_file_id":"3eeb7c7200ed797f9b2a6a7d2e7c1102ef34a6ef9cfb9ea2242f1e4596fe9f79",
     "upscale_by": 2,
     "upscale_steps": 10,
     "upscale_sampler": "uni_pc",
