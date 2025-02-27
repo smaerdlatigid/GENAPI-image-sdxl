@@ -128,9 +128,9 @@
   "97": {
     "inputs": {
       "seed": 945136699822492,
-      "steps": 7,
+      "steps": 8,
       "cfg": 2,
-      "sampler_name": "euler",
+      "sampler_name": "uni_pc",
       "scheduler": "beta",
       "denoise": 1,
       "model": [
