@@ -76,7 +76,7 @@ docker run -d -p 7777:5000 --env-file ./.env --gpus all --name 360-panorama-sdxl
 
 Inspect the API docs in your browser at [http://localhost:7777/docs](). 
 
-When running multiple containers on the same machine, make sure to edit the `.env` file and specify a different GPU and assign the port to 8888 when running an upscaling container:
+When running multiple containers on the same machine, make sure to edit the `.env` file and specify a different GPU and assign the port to 8888 when running an upscale worker:
 
 ```sh
 docker run -d -p 8888:5000 --env-file ./.env --gpus all --name 360-panorama-sdxl-upscale 360-panorama-sdxl
